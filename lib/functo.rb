@@ -51,7 +51,7 @@ class Functo < Module
 
   def define_initialize
     ivars = @inputs.map { |name| "@#{name}" }
-    filters = @filters
+    filter_proc = method(:apply_filters).to_proc
     size = @inputs.size
 
     @inputs_module.class_eval do
@@ -62,25 +62,11 @@ class Functo < Module
           fail ArgumentError, "wrong number of arguments (#{args_size} for #{size})"
         end
 
-        args = _apply_filters(args, filters)
+        args = filter_proc.(args)
         ivars.zip(args) { |ivar, arg| instance_variable_set(ivar, arg) }
       end
 
-      define_method :_apply_filters do |args, filters|
-        args.zip(filters).map do |arg, filter|
-          if filter === Functo.pass
-            arg
-          elsif filter.respond_to?(:[])
-            filter[arg]
-          elsif filter.respond_to?(:call)
-            filter.call(arg)
-          else
-            raise ArgumentError.new("filters must respond to `[]` or `call`")
-          end
-        end
-      end
-
-      private :initialize, :_apply_filters
+      private :initialize
     end
   end
 
@@ -99,6 +85,20 @@ class Functo < Module
     @output_module.class_eval do
       define_method :call do |*args|
         new(*args).public_send(call_method)
+      end
+    end
+  end
+
+  def apply_filters(args)
+    args.zip(@filters).map do |arg, filter|
+      if filter === Functo.pass
+        arg
+      elsif filter.respond_to?(:[])
+        filter[arg]
+      elsif filter.respond_to?(:call)
+        filter.call(arg)
+      else
+        raise ArgumentError.new("filters must respond to `[]` or `call`")
       end
     end
   end
