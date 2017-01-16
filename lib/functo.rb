@@ -9,7 +9,7 @@ class Functo < Module
     output = names.shift
 
     if names.length > MAX_ARGUMENTS
-      raise ArgumentError.new("#{names.length} arguments given when only #{MAX_ARGUMENTS} are allowed")
+      raise ArgumentError.new("given #{names.length} arguments when only #{MAX_ARGUMENTS} are allowed")
     end
 
     new(names, output)

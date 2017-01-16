@@ -1,6 +1,6 @@
 # Functo
 
-Functo is a dynamic module for defining composable method objects in ruby.
+Functo is a dynamic module for composable method objects in ruby.
 
 It turns this:
 
@@ -65,6 +65,11 @@ Multiply.call(10, 20, 30)
 
 class Divide
   include Functo.call :multiply, :first, :second, :third, :fourth
+
+  def divide
+    first / second / third / fourth
+  end
+end
 # => ArgumentError: given 4 arguments when only 3 are allowed
 ```
 
@@ -132,8 +137,10 @@ SumDigits2[123]
 
 ## Acknowledgements
 
-* mbj for ([concord](https://github.com/mbj/concord))
-* snusnu for ([procto](https://github.com/snusnu/procto))
+Functo was inspired by these gems:
+
+* [concord](https://github.com/mbj/concord) by mbj
+* [procto](https://github.com/snusnu/procto) by snusnu
 
 ## Development
 
@@ -143,7 +150,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/functo.
+Bug reports and pull requests are welcome on GitHub at https://github.com/sbscully/functo.
 
 
 ## License
