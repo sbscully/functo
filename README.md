@@ -80,6 +80,7 @@ SquareRoots = Functo.wrap ->(n) { Math.sqrt(n) }
 SquareRootsAddsOne = SquareRoots >> AddsOne
 SquareRootsAddsOne[16]
 # => 5.0
+```
 
 ### Filters
 
