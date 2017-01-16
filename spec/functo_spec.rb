@@ -7,7 +7,7 @@ describe Functo do
 
   before do
     class Adder
-      include Functo.call :number, to: :add
+      include Functo.call :add, :number
 
       def add
         number + 2
@@ -15,7 +15,7 @@ describe Functo do
     end
 
     class TimeserAdder
-      include Functo.call :adder, :timeser, to: :add
+      include Functo.call :add, :adder, :timeser
 
       def add
         timeser * (adder + 2)
@@ -23,7 +23,7 @@ describe Functo do
     end
 
     class Splitter
-      include Functo.call :number, to: :split
+      include Functo.call :split, :number
 
       def split
         number.to_s.split('', 2).map(&:to_i)
@@ -42,6 +42,12 @@ describe Functo do
 
     it 'defines a protected reader on the host' do
       expect { Adder.number }.to raise_error(NoMethodError)
+    end
+
+    it 'only allows up to three input arguments' do
+      expect {
+        Functo.call :in, :one, :two, :three, :four
+      }.to raise_error(ArgumentError)
     end
   end
 
@@ -81,5 +87,7 @@ describe Functo do
 
       expect(SplitterTimeserAdder[512]).to eq(84)
     end
+
+    it 'only assumes multi-arg when the arity matches'
   end
 end

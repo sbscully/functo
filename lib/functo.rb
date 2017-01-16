@@ -1,10 +1,16 @@
 require "functo/version"
 
 class Functo < Module
+  MAX_ARGUMENTS = 3
+
   private_class_method :new
 
   def self.call(*names)
-    output = names.pop.fetch(:to)
+    output = names.shift
+
+    if names.length > MAX_ARGUMENTS
+      raise ArgumentError.new("#{names.length} arguments given when only #{MAX_ARGUMENTS} are allowed")
+    end
 
     new(names, output)
   end

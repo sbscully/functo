@@ -1,8 +1,35 @@
 # Functo
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/functo`. To experiment with that code, run `bin/console` for an interactive prompt.
+Functo is a dynamic module for defining composable method objects in ruby.
 
-TODO: Delete this and the text above, and describe your gem
+It turns this:
+
+```ruby
+class AddsTwo
+  attr_reader :number
+  protected :number
+
+  def initialize(number)
+    @number = number
+  end
+
+  def add
+    number + 2
+  end
+end
+```
+
+in to this:
+
+```ruby
+class AddsTwo
+  include Functo.call :add, :number
+
+  def add
+    number + 2
+  end
+end
+```
 
 ## Installation
 
@@ -22,7 +49,86 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Method objects can take up to three arguments.
+
+```ruby
+class Multiply
+  include Functo.call :multiply, :first, :second, :third
+
+  def multiply
+    first * second * third
+  end
+end
+
+Multiply.call(10, 20, 30)
+# => 6000
+
+class Divide
+  include Functo.call :multiply, :first, :second, :third, :fourth
+# => ArgumentError: given 4 arguments when only 3 are allowed
+```
+
+If you find yourself needing more you should consider composing method objects or encapsulating some of your arguments in another object.
+
+You can use square brackets to call Functo objects:
+
+```ruby
+AddsTwo[3]
+# => 5
+```
+
+and they can be used in blocks:
+
+```ruby
+[1, 2, 3].map(&AddsTwo)
+# => [3, 4, 5]
+```
+
+### Composition
+
+You can compose `Functo` objects using `compose` or the turbo operator `>>`:
+
+```ruby
+AddMulti = AddsTwo.compose(MultipliesThree)
+
+AddMulti.call(3)
+# => 15
+
+MultiAdd = MultipliesThree >> AddsTwo
+
+MultiAdd[3]
+# => 11
+```
+
+The difference between the two is that the turbo operator will splat arrays passed between the composed objects but `compose` will not.
+
+```ruby
+class SplitDigits
+  include Functo.call :split, :number
+
+  def split
+    number.to_s.split(//).map(&:to_i)
+  end
+end
+
+class Sum
+  include Functo.call :sum, :first, :second, :third
+
+  def sum
+    first + second + third
+  end
+end
+
+SumDigits = SplitDigits >> Sum
+
+SumDigits[123]
+# => 6
+
+SumDigits2 = SplitDigits.compose(Sum)
+
+SumDigits2[123]
+# => ArgumentError: wrong number of arguments (given 1, expected 3)
+```
 
 ## Development
 
