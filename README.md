@@ -135,9 +135,9 @@ SumDigits2[123]
 # => ArgumentError: wrong number of arguments (given 1, expected 3)
 ```
 
-### Types
+### Filters
 
-Types and coercion are not built in to Functo but they can be achieved by passing anything that responds to `[]` to the constructor.
+Filters can be passed to the Functo constructor, for example to implement types or coercion. A filter can be anything which responds to `[]`.
 
 ```ruby
 class ValidatesNumeric
