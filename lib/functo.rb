@@ -8,16 +8,12 @@ class Functo < Module
   class << self
     private :new
 
-    def define_method_object(&block)
-      Class.new.tap do |klass|
-        klass.define_singleton_method(:call, &block)
-        klass.extend(Functo::Compose)
-      end
-    end
+    def wrap(function = nil, &block)
+      function ||= block if block_given?
 
-    def wrap(obj)
-      define_method_object do |*args|
-        obj.call(*args)
+      Class.new.tap do |klass|
+        klass.define_singleton_method(:call, &function)
+        klass.extend(Functo::Compose)
       end
     end
 

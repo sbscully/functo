@@ -10,7 +10,7 @@ module Functo::Compose
   def compose(outer, splat: false)
     inner = self
 
-    Functo.define_method_object do |*args|
+    Functo.wrap do |*args|
       if splat
         outer.call(*inner.call(*args))
       else
@@ -30,7 +30,7 @@ module Functo::Compose
   def slurp
     inner = self
 
-    Functo.define_method_object do |arr|
+    Functo.wrap do |arr|
       inner.call(*arr)
     end
   end

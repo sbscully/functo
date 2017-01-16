@@ -79,7 +79,7 @@ SumsDigits2[1066]
 # => 13
 ```
 
-Any object that responds to `call` can be made composable.
+Any object that responds to `to_proc` can be made composable.
 
 ```ruby
 SquareRoots = Functo.wrap ->(n) { Math.sqrt(n) }
