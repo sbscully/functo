@@ -13,7 +13,7 @@ class AddsOne
   end
 end
 
-AddsOne[1] # `.call` or `.()` would also work
+AddsOne[1] # `.call` or `.()` also work
 # => 2
 
 class Multiplies
