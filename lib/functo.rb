@@ -1,4 +1,5 @@
 require "functo/version"
+require "functo/compose"
 
 class Functo < Module
   MAX_ATTRIBUTES = 3
@@ -7,12 +8,16 @@ class Functo < Module
   class << self
     private :new
 
-    def wrap(obj)
-      block = ->(*args) { obj.call(*args) }
-
+    def define_method_object(&block)
       Class.new.tap do |klass|
         klass.define_singleton_method(:call, &block)
-        klass.extend(ClassMethods)
+        klass.extend(Functo::Compose)
+      end
+    end
+
+    def wrap(obj)
+      define_method_object do |*args|
+        obj.call(*args)
       end
     end
 
@@ -66,7 +71,7 @@ class Functo < Module
     host.include(@attributes_module)
     host.extend(@function_module)
 
-    host.extend(ClassMethods)
+    host.extend(Functo::Compose)
   end
 
   def define_initialize
@@ -125,36 +130,5 @@ class Functo < Module
       end
     end
   end
-
-  module ClassMethods
-    def [](*args)
-      call(*args)
-    end
-
-    def to_proc
-      public_method(:call).to_proc
-    end
-
-    def compose(outer, splat: false)
-      inner = self
-      block = Proc.new do |*args|
-        if splat
-          outer.call(*inner.call(*args))
-        else
-          outer.call(inner.call(*args))
-        end
-      end
-
-      Class.new.tap do |klass|
-        klass.define_singleton_method(:call, &block)
-        klass.extend(ClassMethods)
-      end
-    end
-
-    def >>(outer)
-      compose(outer, splat: true)
-    end
-  end
-  private_constant(:ClassMethods)
 
 end
