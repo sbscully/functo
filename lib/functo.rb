@@ -119,7 +119,7 @@ class Functo < Module
 
   def apply_filters(args)
     args.zip(@filters).map do |arg, filter|
-      if filter === Functo.pass
+      if filter.equal?(Functo.pass)
         arg
       elsif filter.respond_to?(:[])
         filter[arg]
