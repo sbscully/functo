@@ -97,10 +97,11 @@ describe Functo do
 
   describe 'filters' do
     before do
+      class ValidationError < StandardError
+      end
+
       class ValidatesNonZeroNumber
         include Functo.call :validate, :number
-
-        ValidationError = Class.new(StandardError)
 
         def validate
           raise ValidationError if number.to_f == 0
@@ -125,8 +126,8 @@ describe Functo do
     end
 
     it 'can be used for validation' do
-      expect { DividesTwoBy[0] }.to raise_error(ValidatesNonZeroNumber::ValidationError)
-      expect { DividesTwoBy['0'] }.to raise_error(ValidatesNonZeroNumber::ValidationError)
+      expect { DividesTwoBy[0] }.to raise_error(ValidationError)
+      expect { DividesTwoBy['0'] }.to raise_error(ValidationError)
     end
 
     it 'has a noop filter' do
@@ -139,7 +140,7 @@ describe Functo do
       end
 
       expect(Divide[2, 0]).to eq(0)
-      expect { Divide[0, 2] }.to raise_error(ValidatesNonZeroNumber::ValidationError)
+      expect { Divide[0, 2] }.to raise_error(ValidationError)
     end
 
     it 'fails if a filter has no [] or call method' do

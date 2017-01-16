@@ -1,52 +1,61 @@
 require "functo/version"
 
 class Functo < Module
-  MAX_ARGUMENTS = 3
+  MAX_ATTRIBUTES = 3
   PASS = '__FUNCTO_PASS__'.freeze
 
-  private_class_method :new
+  class << self
+    private :new
 
-  def self.wrap(obj)
-    klass = Class.new
+    def wrap(obj)
+      block = ->(*args) { obj.call(*args) }
 
-    klass.define_singleton_method :call do |*args|
-      obj.call(*args)
+      Class.new.tap do |klass|
+        klass.define_singleton_method(:call, &block)
+        klass.extend(ClassMethods)
+      end
     end
 
-    klass.extend(ClassMethods)
-    klass
-  end
-
-  def self.pass
-    PASS
-  end
-
-  def self.call(*names)
-    output = names.shift
-
-    if names.first.is_a?(Hash)
-      inputs = names.first
-      filters = inputs.values
-      names = inputs.keys
-    else
-      filters = [pass] * names.length
+    def pass
+      PASS
     end
 
-    if names.length > MAX_ARGUMENTS
-      raise ArgumentError.new("given #{names.length} arguments when only #{MAX_ARGUMENTS} are allowed")
+    def call(*args)
+      new(*parse_args(args))
     end
 
-    new(names, filters, output)
+    private
+
+    def parse_args(args)
+      function, *inputs = *args
+
+      if inputs.first.is_a?(Hash)
+        inputs = inputs.first
+
+        attributes = inputs.keys
+        filters = inputs.values
+      else
+        attributes = inputs
+        filters = [pass] * inputs.length
+      end
+
+      if attributes.length > MAX_ATTRIBUTES
+        raise ArgumentError.new("given #{attributes.length} attributes when only #{MAX_ATTRIBUTES} are allowed")
+      end
+
+      [attributes, function, filters]
+    end
   end
 
   private
 
-  def initialize(inputs, filters, output)
-    @inputs = inputs
+  def initialize(attributes, function, filters)
+    @attributes = attributes
+    @function = function
     @filters = filters
-    @output = output
-    @inputs_module = Module.new
-    @output_module = Module.new
+
+    @attributes_module = Module.new
+    @function_module = Module.new
 
     define_initialize
     define_readers
@@ -54,27 +63,30 @@ class Functo < Module
   end
 
   def included(host)
-    host.include(@inputs_module)
-    host.extend(@output_module)
+    host.include(@attributes_module)
+    host.extend(@function_module)
 
     host.extend(ClassMethods)
   end
 
   def define_initialize
-    ivars = @inputs.map { |name| "@#{name}" }
-    filter_proc = method(:apply_filters).to_proc
-    size = @inputs.size
+    ivars = @attributes.map { |name| "@#{name}" }
+    size = @attributes.size
+    filter = method(:apply_filters).to_proc
 
-    @inputs_module.class_eval do
+    @attributes_module.class_eval do
       define_method :initialize do |*args|
         args_size = args.size
 
         if args_size != size
-          fail ArgumentError, "wrong number of arguments (#{args_size} for #{size})"
+          message = "wrong number of arguments (#{args_size} for #{size})"
+
+          raise ArgumentError.new(message)
         end
 
-        args = filter_proc.(args)
-        ivars.zip(args) { |ivar, arg| instance_variable_set(ivar, arg) }
+        ivars.zip(filter.call(args)) do |ivar, arg|
+          instance_variable_set(ivar, arg)
+        end
       end
 
       private :initialize
@@ -82,20 +94,20 @@ class Functo < Module
   end
 
   def define_readers
-    attribute_names = @inputs
+    attributes = @attributes
 
-    @inputs_module.class_eval do
-      attr_reader(*attribute_names)
-      protected(*attribute_names)
+    @attributes_module.class_eval do
+      attr_reader(*attributes)
+      protected(*attributes)
     end
   end
 
   def define_call
-    call_method = @output
+    function = @function
 
-    @output_module.class_eval do
+    @function_module.class_eval do
       define_method :call do |*args|
-        new(*args).public_send(call_method)
+        new(*args).public_send(function)
       end
     end
   end
@@ -125,9 +137,7 @@ class Functo < Module
 
     def compose(outer, splat: false)
       inner = self
-      klass = Class.new
-
-      klass.define_singleton_method :call do |*args|
+      block = Proc.new do |*args|
         if splat
           outer.call(*inner.call(*args))
         else
@@ -135,8 +145,10 @@ class Functo < Module
         end
       end
 
-      klass.extend(ClassMethods)
-      klass
+      Class.new.tap do |klass|
+        klass.define_singleton_method(:call, &block)
+        klass.extend(ClassMethods)
+      end
     end
 
     def >>(outer)
