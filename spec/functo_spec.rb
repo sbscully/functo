@@ -82,12 +82,16 @@ describe Functo do
       expect(SuperDuperAdder[3]).to eq(11)
     end
 
-    it 'compose multi-arg functions' do
+    it 'compose splatting' do
       SplitterTimeserAdder = Splitter >> TimeserAdder
 
       expect(SplitterTimeserAdder[512]).to eq(84)
     end
 
-    it 'only assumes multi-arg when the arity matches'
+    it '#compose does not splat' do
+      SplitterTimeserAdder2 = Splitter.compose(TimeserAdder)
+
+      expect { SplitterTimeserAdder2[512] }.to raise_error(ArgumentError)
+    end
   end
 end

@@ -82,19 +82,26 @@ class Functo < Module
       public_method(:call).to_proc
     end
 
-    def compose(outer)
+    def compose(outer, splat: false)
       inner = self
       klass = Class.new
 
       klass.define_singleton_method :call do |*args|
-        outer.call(*inner.call(*args))
+        if splat
+          outer.call(*inner.call(*args))
+        else
+          outer.call(inner.call(*args))
+        end
       end
 
       klass.extend(ClassMethods)
 
       klass
     end
-    alias :>> :compose
+
+    def >>(outer)
+      compose(outer, splat: true)
+    end
   end
   private_constant(:ClassMethods)
 
