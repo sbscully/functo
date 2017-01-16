@@ -146,6 +146,7 @@ AddsThree = Functo.wrap ->(n) { n + 3 }
 
 (AddsTwo >> AddsThree)[10]
 # => 15
+```
 
 ### Filters
 
