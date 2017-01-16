@@ -95,7 +95,7 @@ describe Functo do
     end
   end
 
-  describe 'types and validation' do
+  describe 'filters' do
     before do
       class ValidatesNonZeroNumber
         include Functo.call :validate, :number
@@ -152,6 +152,14 @@ describe Functo do
       end
 
       expect { Divide2[2, 0] }.to raise_error(ArgumentError)
+    end
+  end
+
+  describe 'wrap' do
+    it 'can wrap an object that responds to call' do
+      AddsThree = Functo.wrap ->(n) { n + 3 }
+
+      expect((Adder >> AddsThree)[10]).to eq(15)
     end
   end
 end

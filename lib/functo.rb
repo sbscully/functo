@@ -6,6 +6,17 @@ class Functo < Module
 
   private_class_method :new
 
+  def self.wrap(obj)
+    klass = Class.new
+
+    klass.define_singleton_method :call do |*args|
+      obj.call(*args)
+    end
+
+    klass.extend(ClassMethods)
+    klass
+  end
+
   def self.pass
     PASS
   end
@@ -125,7 +136,6 @@ class Functo < Module
       end
 
       klass.extend(ClassMethods)
-
       klass
     end
 
