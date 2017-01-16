@@ -129,6 +129,7 @@ Functo was inspired by:
 
 * [concord](https://github.com/mbj/concord) by mbj
 * [procto](https://github.com/snusnu/procto) by snusnu
+* [dry-pipeline](https://github.com/dry-rb/dry-pipeline)
 
 ## Contributing
 
