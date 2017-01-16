@@ -31,7 +31,7 @@ Multiplies[2, 3]
 Functo objects can be used in place of a `Proc`.
 
 ```ruby
-[1, 2, 3].map(&AddOne)
+[1, 2, 3].map(&AddsOne)
 # => [2, 3, 4]
 ```
 
@@ -47,7 +47,7 @@ MultipliesAddsOne[2, 3]
 `>>` splats intermediate results. Use `>` to compose without splatting intermediate results.
 
 ```ruby
-class SplitDigits
+class SplitsDigits
   include Functo.call :split, :number
 
   def split
@@ -55,7 +55,7 @@ class SplitDigits
   end
 end
 
-class Sum
+class Sums
   include Functo.call :sum, :arr
 
   def sum
@@ -63,12 +63,12 @@ class Sum
   end
 end
 
-SumDigits = SplitDigits >> Sum
-SumDigits[1066]
+SumsDigits = SplitsDigits >> Sums
+SumsDigits[1066]
 # => ArgumentError: wrong number of arguments (4 for 1)
 
-SumDigits2 = SplitDigits > Sum
-SumDigits2[1066]
+SumsDigits2 = SplitsDigits > Sums
+SumsDigits2[1066]
 # => 13
 ```
 
