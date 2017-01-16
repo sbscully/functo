@@ -139,37 +139,17 @@ SumDigits2[123]
 # => ArgumentError: wrong number of arguments (given 1, expected 3)
 ```
 
-### Filters
-
-Filters can be passed to the Functo constructor, for example to implement types or coercion. A filter can be anything which responds to `[]`.
+Any object that repsonds to `call` can be made composable by using `Functo.wrap`.
 
 ```ruby
-class ValidatesNumeric
-  include Functo.call :validate, :number
+AddsThree = Functo.wrap ->(n) { n + 3 }
 
-  ValidationError = Class.new(StandardError)
+(AddsTwo >> AddsThree)[10]
+# => 15
 
-  def validate
-    raise ValidationError unless number.is_a?(Numeric)
+### Filters
 
-    number
-  end
-end
-
-class AddsThree
-  include Functo.call :add, number: ValidatesNumeric
-
-  def add
-    number + 2
-  end
-end
-
-AddsThree[10]
-# => 13
-
-AddsThree['10']
-# => ValidationError
-```
+Filters can be passed to the Functo constructor, for example to implement types or coercion. A filter can be anything which responds to `[]` or `call`.
 
 You could use the `dry-types` gem for example.
 
@@ -196,7 +176,7 @@ AddsFour['4']
 
 ```
 
-If you have multiple arguments and only want one of them to have a filter, you can use `Functo.pass` for a filter that just returns its input.
+If you have multiple arguments and do not want to filter one or more of them, you can use `Functo.pass` for a filter that just returns its input.
 
 ## Acknowledgements
 
