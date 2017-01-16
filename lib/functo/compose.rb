@@ -26,4 +26,12 @@ module Functo::Compose
   def >>(outer)
     compose(outer, splat: true)
   end
+
+  def slurp
+    inner = self
+
+    Functo.define_method_object do |arr|
+      inner.call(*arr)
+    end
+  end
 end

@@ -35,6 +35,13 @@ Functo objects can be used in place of a `Proc`.
 # => [2, 3, 4]
 ```
 
+Use `slurp` to splat array inputs.
+
+```ruby
+[[1, 2], [3, 4], [5, 6]].map(&Multiplies.slurp)
+# => [2, 12, 30]
+```
+
 ### Composition
 
 ```ruby

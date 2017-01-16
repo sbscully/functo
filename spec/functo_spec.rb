@@ -67,6 +67,10 @@ describe Functo do
     it 'used as a block' do
       expect([1, 2, 3].map(&Adder)).to eq([3, 4, 5])
     end
+
+    it 'used as a block that slurps' do
+      expect([[1, 2], [3, 4]].map(&TimeserAdder.slurp)).to eq([6, 20])
+    end
   end
 
   describe 'composition' do
