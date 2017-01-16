@@ -121,7 +121,7 @@ describe Functo do
     it 'can be used for coercion' do
       expect(DividesTwoBy[5.0]).to eq(0.4)
       expect(DividesTwoBy[5]).to eq(0.4)
-      expect(DividesTwoBy['5']).to eq(0.4)
+      expect(DividesTwoBy.call('5')).to eq(0.4)
     end
 
     it 'can be used for validation' do
@@ -140,6 +140,18 @@ describe Functo do
 
       expect(Divide[2, 0]).to eq(0)
       expect { Divide[0, 2] }.to raise_error(ValidatesNonZeroNumber::ValidationError)
+    end
+
+    it 'fails if a filter has no [] or call method' do
+      class Divide2
+        include Functo.call :divide, first: ValidatesNonZeroNumber, second: nil
+
+        def divide
+          second / first
+        end
+      end
+
+      expect { Divide2[2, 0] }.to raise_error(ArgumentError)
     end
   end
 end

@@ -2,11 +2,12 @@ require "functo/version"
 
 class Functo < Module
   MAX_ARGUMENTS = 3
+  PASS = '__FUNCTO_PASS__'.freeze
 
   private_class_method :new
 
   def self.pass
-    Proc.new { |obj| obj }
+    PASS
   end
 
   def self.call(*names)
@@ -17,7 +18,7 @@ class Functo < Module
       filters = inputs.values
       names = inputs.keys
     else
-      filters = []
+      filters = [pass] * names.length
     end
 
     if names.length > MAX_ARGUMENTS
@@ -61,12 +62,25 @@ class Functo < Module
           fail ArgumentError, "wrong number of arguments (#{args_size} for #{size})"
         end
 
-        args = args.zip(filters).map { |arg, f| f.respond_to?(:[]) ? f[arg] : arg }
-
+        args = _apply_filters(args, filters)
         ivars.zip(args) { |ivar, arg| instance_variable_set(ivar, arg) }
       end
 
-      private :initialize
+      define_method :_apply_filters do |args, filters|
+        args.zip(filters).map do |arg, filter|
+          if filter === Functo.pass
+            arg
+          elsif filter.respond_to?(:[])
+            filter[arg]
+          elsif filter.respond_to?(:call)
+            filter.call(arg)
+          else
+            raise ArgumentError.new("filters must respond to `[]` or `call`")
+          end
+        end
+      end
+
+      private :initialize, :_apply_filters
     end
   end
 
