@@ -94,4 +94,39 @@ describe Functo do
       expect { SplitterTimeserAdder2[512] }.to raise_error(ArgumentError)
     end
   end
+
+  describe 'types and validation' do
+    before do
+      class ValidatesNonZeroNumber
+        include Functo.call :validate, :number
+
+        ValidationError = Class.new(StandardError)
+
+        def validate
+          raise ValidationError if number.to_f == 0
+
+          number.to_f
+        end
+      end
+
+      class DividesTwoBy
+        include Functo.call :divide, number: ValidatesNonZeroNumber
+
+        def divide
+          2.0 / number
+        end
+      end
+    end
+
+    it 'can be used for coercion' do
+      expect(DividesTwoBy[5.0]).to eq(0.4)
+      expect(DividesTwoBy[5]).to eq(0.4)
+      expect(DividesTwoBy['5']).to eq(0.4)
+    end
+
+    it 'can be used for validation' do
+      expect { DividesTwoBy[0] }.to raise_error(ValidatesNonZeroNumber::ValidationError)
+      expect { DividesTwoBy['0'] }.to raise_error(ValidatesNonZeroNumber::ValidationError)
+    end
+  end
 end

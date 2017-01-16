@@ -135,6 +135,63 @@ SumDigits2[123]
 # => ArgumentError: wrong number of arguments (given 1, expected 3)
 ```
 
+### Types
+
+Types and coercion are not built in to Functo but they can be achieved by passing anything that responds to `[]` to the constructor.
+
+```ruby
+class ValidatesNumeric
+  include Functo.call :validate, :number
+
+  ValidationError = Class.new(StandardError)
+
+  def validate
+    raise ValidationError unless number.is_a?(Numeric)
+
+    number
+  end
+end
+
+class AddsThree
+  include Functo.call :add, number: ValidatesNumeric
+
+  def add
+    number + 2
+  end
+end
+
+AddsThree[10]
+# => 13
+
+AddsThree['10']
+# => ValidationError
+```
+
+You could use the `dry-types` gem for example.
+
+```ruby
+require 'dry-types'
+
+module Types
+  include Dry::Types.module
+end
+
+class AddsFour
+  include Functo.call :add, number: Types::Strict::Int
+
+  def add
+    number + 4
+  end
+end
+
+AddsFour[4]
+# => 4
+
+AddsFour['4']
+# => Dry::Types::ConstraintError
+
+```
+
 ## Acknowledgements
 
 Functo was inspired by these gems:
