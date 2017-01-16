@@ -6,6 +6,10 @@ It turns this:
 
 ```ruby
 class AddsTwo
+  def self.call(*args)
+    new(*args).add
+  end
+
   attr_reader :number
   protected :number
 
