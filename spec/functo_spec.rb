@@ -128,5 +128,18 @@ describe Functo do
       expect { DividesTwoBy[0] }.to raise_error(ValidatesNonZeroNumber::ValidationError)
       expect { DividesTwoBy['0'] }.to raise_error(ValidatesNonZeroNumber::ValidationError)
     end
+
+    it 'has a noop filter' do
+      class Divide
+        include Functo.call :divide, first: ValidatesNonZeroNumber, second: Functo.pass
+
+        def divide
+          second / first
+        end
+      end
+
+      expect(Divide[2, 0]).to eq(0)
+      expect { Divide[0, 2] }.to raise_error(ValidatesNonZeroNumber::ValidationError)
+    end
   end
 end

@@ -5,6 +5,10 @@ class Functo < Module
 
   private_class_method :new
 
+  def self.pass
+    Proc.new { |obj| obj }
+  end
+
   def self.call(*names)
     output = names.shift
 

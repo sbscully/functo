@@ -196,6 +196,8 @@ AddsFour['4']
 
 ```
 
+If you have multiple arguments and only want one of them to have a filter, you can use `Functo.pass` for a filter that just returns its input.
+
 ## Acknowledgements
 
 Functo was inspired by these gems:
