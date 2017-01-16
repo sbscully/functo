@@ -49,7 +49,7 @@ Or install it yourself as:
 
 ## Usage
 
-Method objects can take up to three arguments.
+Functo objects can take up to three arguments.
 
 ```ruby
 class Multiply
@@ -86,7 +86,7 @@ and they can be used in blocks:
 
 ### Composition
 
-You can compose `Functo` objects using `compose` or the turbo operator `>>`:
+Functo objects can be composed using `compose` or the turbo operator `>>`:
 
 ```ruby
 AddMulti = AddsTwo.compose(MultipliesThree)
@@ -129,6 +129,11 @@ SumDigits2 = SplitDigits.compose(Sum)
 SumDigits2[123]
 # => ArgumentError: wrong number of arguments (given 1, expected 3)
 ```
+
+## Acknowledgements
+
+* mbj for ([concord](https://github.com/mbj/concord))
+* snusnu for ([procto](https://github.com/snusnu/procto))
 
 ## Development
 
