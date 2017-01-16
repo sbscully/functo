@@ -88,8 +88,8 @@ describe Functo do
       expect(SplitterTimeserAdder[512]).to eq(84)
     end
 
-    it '#compose does not splat' do
-      SplitterTimeserAdder2 = Splitter.compose(TimeserAdder)
+    it '> does not splat' do
+      SplitterTimeserAdder2 = Splitter > TimeserAdder
 
       expect { SplitterTimeserAdder2[512] }.to raise_error(ArgumentError)
     end

@@ -19,6 +19,10 @@ module Functo::Compose
     end
   end
 
+  def >(outer)
+    compose(outer, splat: false)
+  end
+
   def >>(outer)
     compose(outer, splat: true)
   end

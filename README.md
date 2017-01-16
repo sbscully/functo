@@ -1,115 +1,50 @@
 # Functo
 
-Functo is a dynamic module for composable method objects in ruby.
-
-It turns this:
-
-```ruby
-class AddsTwo
-  def self.call(*args)
-    new(*args).add
-  end
-
-  attr_reader :number
-  protected :number
-
-  def initialize(number)
-    @number = number
-  end
-
-  def add
-    number + 2
-  end
-end
-```
-
-in to this:
-
-```ruby
-class AddsTwo
-  include Functo.call :add, :number
-
-  def add
-    number + 2
-  end
-end
-```
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'functo'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install functo
+Composable method objects in ruby.
 
 ## Usage
 
-Functo objects can take up to three arguments.
-
 ```ruby
-class Multiply
-  include Functo.call :multiply, :first, :second, :third
+class AddsOne
+  include Functo.call :add, :number
+
+  def add
+    number + 1
+  end
+end
+
+AddsOne[1]
+# => 2
+
+class Multiplies
+  include Functo.call :multiply, :foo, :bar
 
   def multiply
-    first * second * third
+    foo * bar
   end
 end
 
-Multiply.call(10, 20, 30)
-# => 6000
-
-class Divide
-  include Functo.call :multiply, :first, :second, :third, :fourth
-
-  def divide
-    first / second / third / fourth
-  end
-end
-# => ArgumentError: given 4 arguments when only 3 are allowed
+Multiplies[2, 3]
+# => 6
 ```
 
-If you find yourself needing more you should consider composing method objects or encapsulating some of your arguments in another object.
-
-You can use square brackets to call Functo objects:
+Functo objects can be used in place of a `Proc`.
 
 ```ruby
-AddsTwo[3]
-# => 5
-```
-
-and they can be used in blocks:
-
-```ruby
-[1, 2, 3].map(&AddsTwo)
-# => [3, 4, 5]
+[1, 2, 3].map(&AddOne)
+# => [2, 3, 4]
 ```
 
 ### Composition
 
-Functo objects can be composed using `compose` or the turbo operator `>>`:
-
 ```ruby
-AddMulti = AddsTwo.compose(MultipliesThree)
+MultipliesAddsOne = Multiplies >> AddsOne
 
-AddMulti.call(3)
-# => 15
-
-MultiAdd = MultipliesThree >> AddsTwo
-
-MultiAdd[3]
-# => 11
+MultipliesAddsOne[2, 3]
+# => 7
 ```
 
-The difference between the two is that the turbo operator will splat arrays passed between the composed objects but `compose` will not.
+`>>` splats intermediate results. Use `>` to compose without splatting intermediate results.
 
 ```ruby
 class SplitDigits
@@ -121,38 +56,49 @@ class SplitDigits
 end
 
 class Sum
-  include Functo.call :sum, :first, :second, :third
+  include Functo.call :sum, :arr
 
   def sum
-    first + second + third
+    arr.reduce(:+)
   end
 end
 
 SumDigits = SplitDigits >> Sum
+SumDigits[1066]
+# => ArgumentError: wrong number of arguments (4 for 1)
 
-SumDigits[123]
-# => 6
-
-SumDigits2 = SplitDigits.compose(Sum)
-
-SumDigits2[123]
-# => ArgumentError: wrong number of arguments (given 1, expected 3)
+SumDigits2 = SplitDigits > Sum
+SumDigits2[1066]
+# => 13
 ```
 
-Any object that repsonds to `call` can be made composable by using `Functo.wrap`.
+Any object that responds to `call` can be made composable.
 
 ```ruby
-AddsThree = Functo.wrap ->(n) { n + 3 }
+SquareRoots = Functo.wrap ->(n) { Math.sqrt(n) }
 
-(AddsTwo >> AddsThree)[10]
-# => 15
-```
+SquareRootsAddsOne = SquareRoots >> AddsOne
+SquareRootsAddsOne[16]
+# => 5.0
 
 ### Filters
 
-Filters can be passed to the Functo constructor, for example to implement types or coercion. A filter can be anything which responds to `[]` or `call`.
+```ruby
+class DividesTwo
+  include Functo.call :divide, number: ->(n) { Float(n) }
 
-You could use the `dry-types` gem for example.
+  def divide
+    2 / number
+  end
+end
+
+DividesTwo['4']
+# => 0.5
+```
+
+A filter can be any object that responds to `call` or `[]`.
+
+For example using [dry-types](https://github.com/dry-rb/dry-types).
 
 ```ruby
 require 'dry-types'
@@ -161,27 +107,24 @@ module Types
   include Dry::Types.module
 end
 
-class AddsFour
-  include Functo.call :add, number: Types::Strict::Int
+class Squares
+  include Functo.call :square, number: Types::Strict::Int
 
-  def add
-    number + 4
+  def square
+    number**2
   end
 end
 
-AddsFour[4]
-# => 4
+Squares[4]
+# => 16
 
-AddsFour['4']
-# => Dry::Types::ConstraintError
-
+Squares['4']
+# => Dry::Types::ConstraintError: "4" violates constraints
 ```
-
-If you have multiple arguments and do not want to filter one or more of them, you can use `Functo.pass` for a filter that just returns its input.
 
 ## Acknowledgements
 
-Functo was inspired by these gems:
+Functo was inspired by:
 
 * [concord](https://github.com/mbj/concord) by mbj
 * [procto](https://github.com/snusnu/procto) by snusnu
