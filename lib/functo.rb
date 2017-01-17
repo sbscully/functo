@@ -117,12 +117,14 @@ class Functo < Module
     args.zip(@filters).map do |arg, filter|
       if filter.equal?(Functo.pass)
         arg
-      elsif filter.respond_to?(:[])
-        filter[arg]
+      elsif filter.respond_to?(:to_proc)
+        filter.to_proc.call(arg)
       elsif filter.respond_to?(:call)
         filter.call(arg)
+      elsif filter.respond_to?(:[])
+        filter[arg]
       else
-        raise ArgumentError.new("filters must respond to `[]` or `call`")
+        raise ArgumentError.new("filters must respond to `to_proc`, `call`, or `[]`")
       end
     end
   end

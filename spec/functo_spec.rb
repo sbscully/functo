@@ -134,6 +134,18 @@ describe Functo do
       expect { DividesTwoBy['0'] }.to raise_error(ValidationError)
     end
 
+    it 'can be used with a symbol' do
+      class DividesThreeBy
+        include Functo.call :divide, number: :to_f
+
+        def divide
+          3 / number
+        end
+      end
+
+      expect(DividesThreeBy['4']).to eq(0.75)
+    end
+
     it 'has a noop filter' do
       class Divide
         include Functo.call :divide, first: ValidatesNonZeroNumber, second: Functo.pass
@@ -147,7 +159,7 @@ describe Functo do
       expect { Divide[0, 2] }.to raise_error(ValidationError)
     end
 
-    it 'fails if a filter has no [] or call method' do
+    it 'fails if a filter has no [], to_proc, or call method' do
       class Divide2
         include Functo.call :divide, first: ValidatesNonZeroNumber, second: nil
 

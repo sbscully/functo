@@ -106,9 +106,20 @@ end
 
 DividesTwo['4']
 # => 0.5
+
+class DividesThree
+  include Functo.call :divide, number: :to_f
+
+  def divide
+    3 / number
+  end
+end
+
+DividesThree['4']
+# => 0.75
 ```
 
-A filter can be any object that responds to `call` or `[]`.
+A filter can be any object that responds to `to_proc`, `call`, or `[]`.
 
 For example using [dry-types](https://github.com/dry-rb/dry-types).
 
