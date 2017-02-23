@@ -107,8 +107,8 @@ class Functo < Module
     function = @function
 
     @function_module.class_eval do
-      define_method :call do |*args|
-        new(*args).public_send(function)
+      define_method :call do |*args, &block|
+        new(*args).public_send(function, &block)
       end
     end
   end

@@ -179,4 +179,48 @@ describe Functo do
       expect((Adder >> AddsThree)[10]).to eq(15)
     end
   end
+
+  describe 'blocks' do
+    before do
+      class BlockAdder
+        include Functo.call :add, :number
+
+        def add
+          number + yield(number * 2)
+        end
+      end
+
+      class MapAdder
+        include Functo.call :add, :arr
+
+        def add(&block)
+          arr.map(&block).reduce(:+)
+        end
+      end
+
+      class Splitter
+        include Functo.call :split, :number
+
+        def split
+          number.to_s.split(//).map(&:to_i)
+        end
+      end
+    end
+
+    it 'takes a block' do
+      expect(BlockAdder.call(2) { 3 }).to eq(5)
+    end
+
+    it 'accepts the yield' do
+      expect(BlockAdder.call(2) { |number| number + 3 }).to eq(9)
+    end
+
+    it 'allows the block to be pass in with &' do
+      expect(MapAdder.call([1, 2, 3]) { |number| number * number }).to eq(14)
+    end
+
+    it 'can compose' do
+      expect((Splitter > MapAdder).call(123) { |number| number + 3 }).to eq(15)
+    end
+  end
 end

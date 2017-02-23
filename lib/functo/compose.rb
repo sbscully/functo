@@ -10,11 +10,11 @@ module Functo::Compose
   def compose(outer, splat: false)
     inner = self
 
-    Functo.wrap do |*args|
+    Functo.wrap do |*args, &block|
       if splat
-        outer.call(*inner.call(*args))
+        outer.call(*inner.call(*args), &block)
       else
-        outer.call(inner.call(*args))
+        outer.call(inner.call(*args), &block)
       end
     end
   end
